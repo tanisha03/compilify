@@ -1,4 +1,3 @@
-// import {lexer} from "./lexer";
 import { lexer,parser } from './parser.js';
 import { transformer } from './transformer.js';
 import { generator } from './generator.js';
