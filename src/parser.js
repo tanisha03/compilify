@@ -3,10 +3,6 @@
 export function lexer (code) {
     var _tokens = code
                     .replace(/[\n\r]/g, ' *nl* ')
-                    .replace(/\[/g, ' *ob* ')
-                    .replace(/\]/g, ' *cb* ')
-                    .replace(/\{/g, ' *ocb* ')
-                    .replace(/\}/g, ' *ccb* ')
                     .split(/[\t\f\v ]+/)
     var tokens = []
     for (var i = 0; i < _tokens.length; i++) {
@@ -14,14 +10,6 @@ export function lexer (code) {
       if(t.length <= 0 || isNaN(t)) {
         if (t === '*nl*') {
           tokens.push({type: 'newline'})
-        } else if (t === '*ob*') {
-          tokens.push({type: 'ob'})
-        } else if (t === '*cb*') {
-          tokens.push({type: 'cb'})
-        } else if (t === '*ocb*') {
-          tokens.push({type: 'ocb'})
-        } else if (t === '*ccb*') {
-          tokens.push({type: 'ccb'})
         } else if(t.length > 0) {
           tokens.push({type: 'word', value: t})
         }
@@ -37,16 +25,9 @@ export function lexer (code) {
   }
   
   export function parser (tokens) {
-    function expectedTypeCheck (type, expect) {
-      if(Array.isArray(expect)) {
-        var i = expect.indexOf(type)
-        return i >= 0
-      }
-      return type === expect
-    }
-  
+
     function createDot (current_token, currentPosition, node) {
-      var expectedType = ['ob', 'number', 'number', 'cb']
+      var expectedType = ['ob', 'number', 'cb']
       var expectedLength = 4
       currentPosition = currentPosition || 0
       node = node || {type: 'dot'}
@@ -77,16 +58,7 @@ export function lexer (code) {
           throw command + ' takes ' + expectedLength + ' argument(s). '
         }
   
-        if (expectedType){
-          var expected = expectedTypeCheck(token.type, expectedType[currentPosition])
-          if (!expected) {
-            throw command + ' takes ' + JSON.stringify(expectedType[currentPosition]) + ' as argument ' + (currentPosition + 1) + '. ' + (token ? 'Instead found a ' + token.type + ' '+ (token.value || '') + '.' : '')
-          }
-          if (token.type === 'number' && (token.value < 0 || token.value > 100)){
-            throw 'Found value ' + token.value + ' for ' + command + '. Value must be between 0 - 100.'
-          }
-        }
-  
+
         var arg = {
           type: token.type,
           value: token.value
@@ -108,35 +80,9 @@ export function lexer (code) {
     var pen = false
   
     while (tokens.length > 0) {
-      // console.log(tokens);
       var current_token = tokens.shift()
-      // console.log(current_token);
       if (current_token.type === 'word') {
         switch (current_token.value) {
-          case '{' :
-            var block = {
-              type: 'Block Start'
-            }
-            AST.body.push(block)
-            break
-          case '}' :
-            var block = {
-              type: 'Block End'
-            }
-            AST.body.push(block)
-            break
-          case '//' :
-            var expression = {
-              type: 'CommentExpression',
-              value: ''
-            }
-            var next = tokens.shift()
-            while (next.type !== 'newline') {
-              expression.value += next.value + ' '
-              next = tokens.shift()
-            }
-            AST.body.push(expression)
-            break
           case 'Paper' :
             if (paper) {
               throw 'You can not define Paper more than once'
@@ -180,32 +126,6 @@ export function lexer (code) {
             expression.arguments = expression.arguments.concat(args)
             AST.body.push(expression)
             break
-          case 'Set':
-            var args = findArguments('Set', 2, [['word', 'ob'], 'number'])
-            var obj = {}
-            if (args[0].type === 'dot') {
-              AST.body.push({
-                type: 'CallExpression',
-                name: 'Pen',
-                arguments:[args[1]]
-              })
-              obj.type = 'CallExpression',
-              obj.name = 'Line',
-              obj.arguments = [
-                { type: 'number', value: args[0].x},
-                { type: 'number', value: args[0].y},
-                { type: 'number', value: args[0].x},
-                { type: 'number', value: args[0].y}
-              ]
-            } else {
-              obj.type = 'VariableDeclaration'
-              obj.name = 'Set'
-              obj.identifier = args[0]
-              obj.value = args[1]
-            }
-  
-            AST.body.push(obj)
-            break
           default:
             throw current_token.value + ' is not a valid command'
         }
@@ -213,6 +133,5 @@ export function lexer (code) {
         throw 'Unexpected token type : ' + current_token.type
       }
     }
-    // console.log(AST);
     return AST
   }
