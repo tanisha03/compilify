@@ -1,9 +1,7 @@
-// \s : matches any whitespace character (equal to [\r\n\t\f\v ])
-//  + : match previous condition for one and unlimited times
 export function lexer (code) {
     var _tokens = code
-                    .replace(/[\n\r]/g, ' *nl* ')
-                    .split(/[\t\f\v ]+/)
+                    .replace(/[\n\r]/g, ' *nl* ') //removes any new line spaces
+                    .split(/[\s]+/) //split based on white spaces
     var tokens = []
     for (var i = 0; i < _tokens.length; i++) {
       var t = _tokens[i]
@@ -16,13 +14,15 @@ export function lexer (code) {
       } else {
         tokens.push({type: 'number', value: t})
       }
+
     }
-  
+ 
     if (tokens.length < 1) {
       throw 'No Tokens Found. Try "Paper 10"'
     }
     return tokens
   }
+
   
   export function parser (tokens) {
 
@@ -49,22 +49,20 @@ export function lexer (code) {
       return node
     }
   
-    function findArguments(command, expectedLength, expectedType, currentPosition, currentList) {
+    function findArguments(command, expectedLength, currentPosition, currentList) {
       currentPosition = currentPosition || 0
       currentList = currentList || []
       while (expectedLength > currentPosition) {
         var token = tokens.shift()
+
+        //error handling
         if (!token) {
           throw command + ' takes ' + expectedLength + ' argument(s). '
         }
-  
 
         var arg = {
           type: token.type,
           value: token.value
-        }
-        if (token.type === 'ob') {
-          arg = createDot(token)
         }
         currentList.push(arg)
         currentPosition++
@@ -73,7 +71,7 @@ export function lexer (code) {
     }
   
     var AST = {
-      type: 'Drawing',
+      type: 'Scribble',
       body: []
     }
     var paper = false

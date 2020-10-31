@@ -67,8 +67,6 @@ export function transformer (ast) {
     if(node.type === 'CallExpression' || node.type === 'VariableDeclaration') {
       if(node.name === 'Pen') {
         current_pen_color = findParamValue(node.arguments[0])
-      } else if (node.name === 'Set') {
-        variables[node.identifier.value] = node.value.value
       } else {
         var el = elements[node.name]
         if (!el) {
