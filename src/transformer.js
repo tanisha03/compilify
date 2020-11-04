@@ -21,9 +21,9 @@ export function transformer (ast) {
         tag: 'line',
         attr: {
           x1: findParamValue(param[0]),
-          y1: 100 - findParamValue(param[1]),
+          y1:  findParamValue(param[1]),
           x2: findParamValue(param[2]),
-          y2: 100 - findParamValue(param[3]),
+          y2:  findParamValue(param[3]),
           stroke: makeColor(pen_color_value),
           'stroke-linecap': 'round'
         },
@@ -36,8 +36,8 @@ export function transformer (ast) {
         attr : {
           x: 0,
           y: 0,
-          width: 100,
-          height:100,
+          width: 300,
+          height:300,
           fill: makeColor(findParamValue(param[0]))
         },
         body : []
@@ -48,9 +48,9 @@ export function transformer (ast) {
   var newAST = {
     tag : 'svg',
     attr: {
-      width: 100,
-      height: 100,
-      viewBox: '0 0 100 100',
+      width: 300,
+      height: 300,
+      viewBox: '0 0 300 300',
       xmlns: 'http://www.w3.org/2000/svg',
       version: '1.1'
     },
